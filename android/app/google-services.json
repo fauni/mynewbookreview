@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "102226961719",
+    "project_id": "mibookreview",
+    "storage_bucket": "mibookreview.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:102226961719:android:4625f9cc511086c6a0a6b2",
+        "android_client_info": {
+          "package_name": "com.example.book_review"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyNhOwJFChoBAoJh68oTY74ZSBgGSc7Dc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:102226961719:android:a7d4ff67795cc9f4a0a6b2",
+        "android_client_info": {
+          "package_name": "com.example.my_book_review_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyNhOwJFChoBAoJh68oTY74ZSBgGSc7Dc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
