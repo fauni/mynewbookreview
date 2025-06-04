@@ -4,10 +4,12 @@ import 'package:book_review/blocs/auth_status/auth_status_bloc.dart';
 import 'package:book_review/blocs/auth_status/auth_status_state.dart';
 import 'package:book_review/blocs/books/book_bloc.dart';
 import 'package:book_review/blocs/books/book_detail_bloc.dart';
+import 'package:book_review/blocs/review/review_bloc.dart';
 import 'package:book_review/firebase_options.dart';
 import 'package:book_review/navigation/app_navigation.dart';
 import 'package:book_review/repositories/auth_repository.dart';
 import 'package:book_review/repositories/book_repository.dart';
+import 'package:book_review/repositories/review_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +24,7 @@ void main() async {
 
   final authRepository = AuthRepository();
   final bookRepository = BookRepository();
+  final reviewRepository = ReviewRepository();
 
   runApp(
     MultiBlocProvider(
@@ -29,7 +32,8 @@ void main() async {
         BlocProvider(create: (_) => AuthBloc(authRepository: authRepository)),
         BlocProvider(create: (_) => AuthStatusBloc()),
         BlocProvider(create: (_) => BookBloc(bookRepository: bookRepository)),
-        BlocProvider(create: (_) => BookDetailBloc(bookRepository: bookRepository))
+        BlocProvider(create: (_) => BookDetailBloc(bookRepository: bookRepository)),
+        BlocProvider(create: (_) => ReviewBloc(reviewRepository)),
       ], 
       child: const MyApp()
     )

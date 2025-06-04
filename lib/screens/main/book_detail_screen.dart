@@ -1,6 +1,13 @@
 import 'package:book_review/blocs/books/book_detail_bloc.dart';
 import 'package:book_review/blocs/books/book_detail_event.dart';
 import 'package:book_review/blocs/books/book_detail_state.dart';
+import 'package:book_review/blocs/review/review_bloc.dart';
+import 'package:book_review/blocs/review/review_event.dart';
+import 'package:book_review/blocs/review/review_state.dart';
+import 'package:book_review/models/review.dart';
+import 'package:book_review/widgets/review_form_widget.dart';
+import 'package:book_review/widgets/starting_rating_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,6 +25,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   void initState() {
     super.initState();
     context.read<BookDetailBloc>().add(FetchBookDetail(widget.bookId));
+    context.read<ReviewBloc>().add(LoadReviews(widget.bookId));
   }
 
   @override
@@ -162,6 +170,74 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       },
                     ),
                   ),
+
+                  // Aqui agregar reseñas
+                  const SizedBox(height: 32),
+                  Text(
+                    'Reseñas',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold,),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Mostrar lista de reseñas
+                  BlocBuilder<ReviewBloc, ReviewState>(
+                    builder: (context, state) {
+                      if (state is ReviewLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is ReviewLoaded) {
+                        if (state.reviews.isEmpty) {
+                          return const Text('No hay reseñas aún.');
+                        }
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: state.reviews.length,
+                          itemBuilder: (context, index) {
+                            final review = state.reviews[index];
+                            final isAuthor = review.userId == FirebaseAuth.instance.currentUser?.uid;
+                            return ListTile(
+                              leading: CircleAvatar(child: Text(review.userEmail[0])),
+                              title: Text(review.userEmail, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  StarRating(rating: review.rating, size: 16),
+                                  const SizedBox(height: 4),
+                                  Text(review.comment),
+                                ],
+                              ),
+                              trailing: isAuthor 
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () => _showEditDialog(context, review), 
+                                        icon: const Icon(Icons.edit, color: Colors.grey)
+                                      ),
+                                      IconButton(
+                                        onPressed: () => context.read<ReviewBloc>().add(
+                                          DeleteReview(widget.bookId, review.id)
+                                        ), 
+                                        icon: const Icon(Icons.delete, color: Colors.red)
+                                      )
+                                    ],
+                                  ) 
+                                : null,
+                            );
+                          },
+                        );
+                      } else if (state is ReviewError) {
+                        return Text('Error al cargar reseñas: ${state.message}');
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+
+                  const Divider(height: 32),
+
+                  // Formulario para nueva reseña
+                  ReviewFormWidget(bookId: widget.bookId),
                 ],
               ),
             );
@@ -218,4 +294,63 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       return dateString;
     }
   }
+
+  void _showEditDialog(BuildContext context, Review review) {
+    final commentController = TextEditingController(text: review.comment);
+    int rating = review.rating;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar Reseña'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: commentController,
+              decoration: const InputDecoration(labelText: 'Comentario'),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 8),
+            DropdownButton<int>(
+              value: rating,
+              isExpanded: true,
+              items: [1, 2, 3, 4, 5].map((e) {
+                return DropdownMenuItem(
+                  value: e,
+                  child: Text('$e estrellas'),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    rating = value;
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          ElevatedButton(
+            child: const Text('Guardar'),
+            onPressed: () {
+              context.read<ReviewBloc>().add(UpdateReview(
+                    review.bookId,
+                    review.id,
+                    commentController.text.trim(),
+                    rating,
+                  ));
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
 }
