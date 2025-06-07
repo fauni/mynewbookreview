@@ -1,10 +1,14 @@
 import 'dart:convert';
 
 import 'package:book_review/models/book.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class BookRepository {
-  final String _baseUrl = 'https://reactnd-books-api.udacity.com';
+  // final String _baseUrl = 'https://reactnd-books-api.udacity.com';
+  final _baseUrl = dotenv.env['API_BASE_URL']!;
+
+  
   final String _token = 'token-prueba';
 
   Future<List<Book>> getBooks() async {
