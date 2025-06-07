@@ -1,8 +1,11 @@
 import 'package:book_review/blocs/books/book_bloc.dart';
 import 'package:book_review/blocs/books/book_event.dart';
 import 'package:book_review/blocs/books/book_state.dart';
+import 'package:book_review/blocs/search/search_bloc.dart';
 import 'package:book_review/models/book.dart';
+import 'package:book_review/repositories/book_repository.dart';
 import 'package:book_review/screens/main/book_detail_screen.dart';
+import 'package:book_review/screens/main/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,7 +23,15 @@ class LibraryScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // Implementar búsqueda
+              Navigator.push(
+                context, 
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider(
+                    create: (_) => SearchBloc(BookRepository()),
+                    child: const SearchScreen(),
+                  ),
+                )
+              );
             },
           ),
         ],
