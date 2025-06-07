@@ -34,4 +34,30 @@ class BookRepository {
       throw Exception('Error al obtener el libro con ID: $id');
     }
   }
+
+  Future<List<Book>> searchBooks(String query) async {
+    final response = await http.post(
+      Uri.parse('https://reactnd-books-api.udacity.com/search'),
+      headers: {
+        'Authorization': 'token-prueba',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'query': query, 'maxResults': 20}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['books'] != null && data['books'] is List) {
+        final books = (data['books'] as List)
+            .map((bookJson) => Book.fromJson(bookJson))
+            .toList();
+        return books;
+      } else {
+        return []; // no books found
+      }
+    } else {
+      throw Exception('Error al buscar libros');
+    }
+  }
+
 }
